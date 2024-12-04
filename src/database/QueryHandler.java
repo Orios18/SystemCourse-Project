@@ -68,7 +68,7 @@ public class QueryHandler {
                 String color = rs.getString("color");
 
                 // Print out each row's data in a readable format
-                System.out.println(fixedAcidity + "\t" + volatileAcidity + "\t" + citricAcid + "\t" + residualSugar +
+                System.out.println(fixedAcidity + "\t\t\t" + volatileAcidity + "\t" + citricAcid + "\t" + residualSugar +
                         "\t" + chlorides + "\t" + freeSulfurDioxide + "\t" + totalSulfurDioxide + "\t" +
                         density + "\t" + pH + "\t" + sulphates + "\t" + alcohol + "\t" + quality + "\t" + color);
             }
