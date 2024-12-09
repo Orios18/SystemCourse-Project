@@ -5,75 +5,73 @@ import java.sql.*;
 public class QueryHandler {
 
     // Method to get all wines
-    public static void getAllWines() {
+    public static String getAllWines() {
         String sql = "SELECT * FROM wine_table";
         System.out.println("Executing query: " + sql);
-        executeQuery(sql);
+        return executeQuery(sql);
     }
 
-    public static void getLimitWines(int limit) {
+    public static String getLimitWines(int limit) {
         String sql = "SELECT * FROM wine_table LIMIT " + limit;
         System.out.println("Executing query: " + sql);
-        executeQuery(sql);
+        return executeQuery(sql);
     }
 
-
     // Method to get wines based on a specific quality
-    public static void getWinesByQuality(int quality) {
+    public static String getWinesByQuality(int quality) {
         String sql = "SELECT * FROM wine_table WHERE quality = " + quality;
-        executeQuery(sql);
+        return executeQuery(sql);
     }
 
     // Method to get wines based on alcohol content range
-    public static void getWinesByAlcoholRange(double minAlcohol, double maxAlcohol) {
+    public static String getWinesByAlcoholRange(double minAlcohol, double maxAlcohol) {
         String sql = "SELECT * FROM wine_table WHERE alcohol BETWEEN " + minAlcohol + " AND " + maxAlcohol;
-        executeQuery(sql);
+        return executeQuery(sql);
     }
 
     // Method to get wines based on color
-    public static void getWinesByColor(String color) {
+    public static String getWinesByColor(String color) {
         String sql = "SELECT * FROM wine_table WHERE color = '" + color + "'";
-        executeQuery(sql);
+        return executeQuery(sql);
     }
 
-    // Method to execute a query and print results
-    private static void executeQuery(String sql) {
+    // Method to execute a query and return results as a string
+    private static String executeQuery(String sql) {
+        StringBuilder result = new StringBuilder();
         try (Connection conn = DBConnection.connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
-            // Print column headers (optional)
+            // Print column headers
             int columnCount = rs.getMetaData().getColumnCount();
-            System.out.print("Columns: \n\n");
+            result.append("Results:\n");
+
+            // Add headers with proper alignment
             for (int i = 1; i <= columnCount; i++) {
-                System.out.print(rs.getMetaData().getColumnName(i) + "\t");
+                String columnName = rs.getMetaData().getColumnName(i);
+                result.append(String.format("%-20s", columnName)); // Align header to the left with space padding
             }
-            System.out.println();  // End the header line
+            result.append("\n");
+
+            // Add a separator line
+            result.append(new String(new char[200]).replace("\0", "-")).append("\n");
 
             // Print data row by row
             while (rs.next()) {
-                // Retrieve each column by name and print
-                String fixedAcidity = rs.getString("fixed_acidity");
-                String volatileAcidity = rs.getString("volatile_acidity");
-                String citricAcid = rs.getString("citric_acid");
-                String residualSugar = rs.getString("residual_sugar");
-                String chlorides = rs.getString("chlorides");
-                String freeSulfurDioxide = rs.getString("free_sulfur_dioxide");
-                String totalSulfurDioxide = rs.getString("total_sulfur_dioxide");
-                String density = rs.getString("density");
-                String pH = rs.getString("pH");
-                String sulphates = rs.getString("sulphates");
-                String alcohol = rs.getString("alcohol");
-                String quality = rs.getString("quality");
-                String color = rs.getString("color");
-
-                // Print out each row's data in a readable format
-                System.out.println(fixedAcidity + "\t\t\t" + volatileAcidity + "\t" + citricAcid + "\t" + residualSugar +
-                        "\t" + chlorides + "\t" + freeSulfurDioxide + "\t" + totalSulfurDioxide + "\t" +
-                        density + "\t" + pH + "\t" + sulphates + "\t" + alcohol + "\t" + quality + "\t" + color);
+                for (int i = 1; i <= columnCount; i++) {
+                    String value = rs.getString(i); // Get the value from the column
+                    if (value == null) {
+                        value = "NULL"; // If the value is null, display "NULL"
+                    }
+                    result.append(String.format("%-20s", value)); // Align data under headers with space padding
+                }
+                result.append("\n");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            result.append("Error executing query: ").append(e.getMessage());
         }
+
+        return result.toString();  // Return the formatted string containing the query results
     }
 }
+
