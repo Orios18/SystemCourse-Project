@@ -18,20 +18,25 @@ public class QueryHandler {
     }
 
     // Method to get wines based on a specific quality
-    public static String getWinesByQuality(int quality) {
-        String sql = "SELECT * FROM wine_table WHERE quality = " + quality;
+    public static String getWinesByQuality(String quality) {
+        // Escape single quotes in the quality string to prevent SQL syntax errors
+        String escapedQuality = quality.replace("'", "''");
+        String sql = "SELECT * FROM wine_table WHERE quality = '" + escapedQuality + "'";
+        System.out.println("Executing query for quality: " + escapedQuality);
         return executeQuery(sql);
     }
 
     // Method to get wines based on alcohol content range
     public static String getWinesByAlcoholRange(double minAlcohol, double maxAlcohol) {
         String sql = "SELECT * FROM wine_table WHERE alcohol BETWEEN " + minAlcohol + " AND " + maxAlcohol;
+        System.out.println(sql);
         return executeQuery(sql);
     }
 
     // Method to get wines based on color
     public static String getWinesByColor(String color) {
         String sql = "SELECT * FROM wine_table WHERE color = '" + color + "'";
+        System.out.println(sql);
         return executeQuery(sql);
     }
 
@@ -54,7 +59,7 @@ public class QueryHandler {
             result.append("\n");
 
             // Add a separator line
-            result.append(new String(new char[200]).replace("\0", "-")).append("\n");
+            result.append(new String(new char[260]).replace("\0", "-")).append("\n");
 
             // Print data row by row
             while (rs.next()) {
@@ -74,4 +79,3 @@ public class QueryHandler {
         return result.toString();  // Return the formatted string containing the query results
     }
 }
-
