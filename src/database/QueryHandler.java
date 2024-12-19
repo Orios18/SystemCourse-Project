@@ -59,7 +59,7 @@ public class QueryHandler {
             result.append("\n");
 
             // Add a separator line
-            result.append(new String(new char[260]).replace("\0", "-")).append("\n");
+            result.append(new String(new char[320]).replace("\0", "-")).append("\n");
 
             // Print data row by row
             while (rs.next()) {
@@ -68,7 +68,7 @@ public class QueryHandler {
                     if (value == null) {
                         value = "NULL"; // If the value is null, display "NULL"
                     }
-                    result.append(String.format("%-20s", value)); // Align data under headers with space padding
+                    result.append(String.format("%-25s", value)); // Align data under headers with space padding
                 }
                 result.append("\n");
             }
