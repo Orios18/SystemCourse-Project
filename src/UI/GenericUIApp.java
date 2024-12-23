@@ -75,8 +75,11 @@ public class GenericUIApp extends JPanel {
             case "Get Wines by Quality":
                 addQualityDropdown();
                 addExecuteButton(e -> {
-                    String quality = getFieldValue("quality");
-                    displayQueryResults(QueryHandler.getWinesByQuality(quality));
+                    JComboBox<String> qualityComboBox = (JComboBox<String>) getComponentByName("quality");
+                    if (qualityComboBox != null) {
+                        String quality = (String) qualityComboBox.getSelectedItem();
+                        displayQueryResults(QueryHandler.getWinesByQuality(quality));
+                    }
                 });
                 break;
             case "Get Wines by Alcohol Range":
@@ -93,8 +96,11 @@ public class GenericUIApp extends JPanel {
             case "Get Wines by Color":
                 addColorDropdown();
                 addExecuteButton(e -> {
-                    String color = getFieldValue("color");
-                    displayQueryResults(QueryHandler.getWinesByColor(color));
+                    JComboBox<String> colorComboBox = (JComboBox<String>) getComponentByName("color");
+                    if (colorComboBox != null) {
+                        String color = (String) colorComboBox.getSelectedItem();
+                        displayQueryResults(QueryHandler.getWinesByColor(color));
+                    }
                 });
                 break;
             case "Get Wines by ID":
@@ -159,6 +165,15 @@ public class GenericUIApp extends JPanel {
             }
         }
         return "";
+    }
+
+    private Component getComponentByName(String name) {
+        for (Component component : inputPanel.getComponents()) {
+            if (name.equals(component.getName())) {
+                return component;
+            }
+        }
+        return null;
     }
 
     private void clearTable() {
