@@ -2,7 +2,6 @@ package main;
 
 import UI.GenericUIApp;
 import database.DBConnection;
-import database.DataLoader;
 
 import java.sql.Connection;
 
