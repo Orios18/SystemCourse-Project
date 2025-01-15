@@ -6,7 +6,6 @@ import java.util.List;
 
 public class QueryHandler {
 
-    // Utility class to store query results
     public static class QueryResult {
         private final String[] columnNames;
         private final String[][] data;
@@ -25,7 +24,6 @@ public class QueryHandler {
         }
     }
 
-    // Execute a query and return results
     private static QueryResult executeQuery(String sql) {
         List<String[]> data = new ArrayList<>();
         List<String> columnNames = new ArrayList<>();
@@ -60,8 +58,6 @@ public class QueryHandler {
                 data.toArray(new String[0][])
         );
     }
-
-    // ---------------- Existing Queries ---------------- //
 
     public static QueryResult getAllWines() {
         String sql = "SELECT * FROM wine_table";
@@ -120,8 +116,6 @@ public class QueryHandler {
         return executeQuery(sql);
     }
 
-    // ---------------- New Date-Range Query ---------------- //
-
     /**
      * Get wines by date or date range.
      * If both startDate & endDate are provided, use BETWEEN.
@@ -141,6 +135,31 @@ public class QueryHandler {
             sql = "SELECT * FROM wine_table"; // or throw an error
         }
         System.out.println("Executing date range query: " + sql);
+        return executeQuery(sql);
+    }
+
+    public static QueryResult getWinesByPH(String minPH, String maxPH) {
+        String sql;
+
+        boolean hasMin = (minPH != null && !minPH.isEmpty());
+        boolean hasMax = (maxPH != null && !maxPH.isEmpty());
+
+        if (hasMin && hasMax) {
+            // BETWEEN
+            sql = "SELECT * FROM wine_table WHERE `pH` BETWEEN " + minPH + " AND " + maxPH;
+        } else if (hasMin) {
+            // >=
+            sql = "SELECT * FROM wine_table WHERE `pH` >= " + minPH;
+        } else if (hasMax) {
+            // <=
+            sql = "SELECT * FROM wine_table WHERE `pH` <= " + maxPH;
+        } else {
+            // No parameters given - either return all rows or throw an error
+            // For now, let's return all
+            sql = "SELECT * FROM wine_table";
+        }
+
+        System.out.println("Executing pH query: " + sql);
         return executeQuery(sql);
     }
 }

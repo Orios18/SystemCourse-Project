@@ -7,7 +7,6 @@ import java.sql.Connection;
 
 public class Main {
     public static void main(String[] args) {
-        // Start by connecting to the database
         System.out.println("Starting Wine Database System...");
         try (Connection connection = DBConnection.connect()) {
             if (connection != null) {
