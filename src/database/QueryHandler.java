@@ -4,6 +4,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Handles database queries for the Wine Database System.
+ */
 public class QueryHandler {
 
     public static class QueryResult {
@@ -24,6 +27,12 @@ public class QueryHandler {
         }
     }
 
+    /**
+     * Executes a SQL query and returns the results.
+     *
+     * @param sql The SQL query to execute.
+     * @return QueryResult containing column names and data rows.
+     */
     private static QueryResult executeQuery(String sql) {
         List<String[]> data = new ArrayList<>();
         List<String> columnNames = new ArrayList<>();
@@ -59,18 +68,56 @@ public class QueryHandler {
         );
     }
 
+    /**
+     * Executes a custom SQL query with optional WHERE filters and LIMIT.
+     *
+     * @param baseQuery     The base SQL query (e.g., "SELECT * FROM wine_table").
+     * @param whereFilters  A list of SQL conditions to apply in the WHERE clause.
+     * @param limitFilter   The LIMIT clause value (e.g., "10"), or null if not applicable.
+     * @return QueryResult containing column names and data rows.
+     */
+    public static QueryResult executeCustomQuery(String baseQuery, List<String> whereFilters, String limitFilter) {
+        StringBuilder sql = new StringBuilder(baseQuery);
+        if (whereFilters != null && !whereFilters.isEmpty()) {
+            sql.append(" WHERE ");
+            sql.append(String.join(" AND ", whereFilters));
+        }
+        if (limitFilter != null && !limitFilter.isEmpty()) {
+            sql.append(" LIMIT ").append(limitFilter);
+        }
+        System.out.println("Executing custom query: " + sql.toString());
+        return executeQuery(sql.toString());
+    }
+
+    /**
+     * Retrieves all wines without any filters.
+     *
+     * @return QueryResult containing all wines.
+     */
     public static QueryResult getAllWines() {
         String sql = "SELECT * FROM wine_table";
         System.out.println("Executing query: " + sql);
         return executeQuery(sql);
     }
 
+    /**
+     * Retrieves wines with a specified limit.
+     *
+     * @param limit The maximum number of wines to retrieve.
+     * @return QueryResult containing the limited set of wines.
+     */
     public static QueryResult getLimitWines(int limit) {
         String sql = "SELECT * FROM wine_table LIMIT " + limit;
         System.out.println("Executing query: " + sql);
         return executeQuery(sql);
     }
 
+    /**
+     * Retrieves wines by a specific quality.
+     *
+     * @param quality The quality to filter by (e.g., "slightly satisfied").
+     * @return QueryResult containing wines of the specified quality.
+     */
     public static QueryResult getWinesByQuality(String quality) {
         String escapedQuality = quality.replace("'", "''");
         String sql = "SELECT * FROM wine_table WHERE quality = '" + escapedQuality + "'";
@@ -78,6 +125,13 @@ public class QueryHandler {
         return executeQuery(sql);
     }
 
+    /**
+     * Retrieves wines within a specified alcohol range.
+     *
+     * @param minAlcohol The minimum alcohol level.
+     * @param maxAlcohol The maximum alcohol level.
+     * @return QueryResult containing wines within the specified alcohol range.
+     */
     public static QueryResult getWinesByAlcoholRange(double minAlcohol, double maxAlcohol) {
         String sql = "";
         if (minAlcohol != -1 && maxAlcohol != -1) {
@@ -91,19 +145,38 @@ public class QueryHandler {
         return executeQuery(sql);
     }
 
+    /**
+     * Retrieves wines by color.
+     *
+     * @param color The color to filter by (e.g., "red").
+     * @return QueryResult containing wines of the specified color.
+     */
     public static QueryResult getWinesByColor(String color) {
-        String sql = "SELECT * FROM wine_table WHERE color = '" + color + "'";
-        System.out.println(sql);
+        String escapedColor = color.replace("'", "''");
+        String sql = "SELECT * FROM wine_table WHERE color = '" + escapedColor + "'";
+        System.out.println("Executing color query: " + sql);
         return executeQuery(sql);
     }
 
+    /**
+     * Retrieves wines by ID(s) or a range of IDs.
+     *
+     * @param ids The IDs or range to filter by (e.g., "1,2,3" or "5-10").
+     * @return QueryResult containing wines matching the specified IDs or range.
+     */
     public static QueryResult getWinesById(String ids) {
         String sql;
 
         if (ids.contains("-")) {
             // Range case (e.g., 5-10)
             String[] range = ids.split("-");
-            sql = "SELECT * FROM wine_table WHERE id BETWEEN " + range[0] + " AND " + range[1];
+            if (range.length == 2) {
+                sql = "SELECT * FROM wine_table WHERE id BETWEEN " + range[0].trim() + " AND " + range[1].trim();
+            } else {
+                // Invalid range format
+                System.err.println("Invalid ID range format.");
+                return new QueryResult(new String[]{}, new String[][]{});
+            }
         } else if (ids.contains(",")) {
             // Multiple IDs case (e.g., 1,2,3)
             sql = "SELECT * FROM wine_table WHERE id IN (" + ids + ")";
@@ -117,11 +190,11 @@ public class QueryHandler {
     }
 
     /**
-     * Get wines by date or date range.
-     * If both startDate & endDate are provided, use BETWEEN.
-     * If only startDate is provided, use >= that date.
-     * If only endDate is provided, use <= that date.
-     * If neither, you could handle differently (currently returns all).
+     * Retrieves wines within a specified date range.
+     *
+     * @param startDate The start date (inclusive) in 'YYYY-MM-DD' format.
+     * @param endDate   The end date (inclusive) in 'YYYY-MM-DD' format.
+     * @return QueryResult containing wines within the specified date range.
      */
     public static QueryResult getWinesByDateRange(String startDate, String endDate) {
         String sql;
@@ -132,30 +205,36 @@ public class QueryHandler {
         } else if (!endDate.isEmpty()) {
             sql = "SELECT * FROM wine_table WHERE `date` <= '" + endDate + "'";
         } else {
-            sql = "SELECT * FROM wine_table"; // or throw an error
+            sql = "SELECT * FROM wine_table"; // No date filters applied
         }
         System.out.println("Executing date range query: " + sql);
         return executeQuery(sql);
     }
 
-    public static QueryResult getWinesByPH(String minPH, String maxPH) {
+    /**
+     * Retrieves wines within a specified pH range.
+     *
+     * @param minPHStr The minimum pH level as a string.
+     * @param maxPHStr The maximum pH level as a string.
+     * @return QueryResult containing wines within the specified pH range.
+     */
+    public static QueryResult getWinesByPH(String minPHStr, String maxPHStr) {
         String sql;
 
-        boolean hasMin = (minPH != null && !minPH.isEmpty());
-        boolean hasMax = (maxPH != null && !maxPH.isEmpty());
+        boolean hasMin = (minPHStr != null && !minPHStr.isEmpty());
+        boolean hasMax = (maxPHStr != null && !maxPHStr.isEmpty());
 
         if (hasMin && hasMax) {
             // BETWEEN
-            sql = "SELECT * FROM wine_table WHERE `pH` BETWEEN " + minPH + " AND " + maxPH;
+            sql = "SELECT * FROM wine_table WHERE `pH` BETWEEN " + minPHStr + " AND " + maxPHStr;
         } else if (hasMin) {
             // >=
-            sql = "SELECT * FROM wine_table WHERE `pH` >= " + minPH;
+            sql = "SELECT * FROM wine_table WHERE `pH` >= " + minPHStr;
         } else if (hasMax) {
             // <=
-            sql = "SELECT * FROM wine_table WHERE `pH` <= " + maxPH;
+            sql = "SELECT * FROM wine_table WHERE `pH` <= " + maxPHStr;
         } else {
-            // No parameters given - either return all rows or throw an error
-            // For now, let's return all
+            // No pH filters applied
             sql = "SELECT * FROM wine_table";
         }
 
