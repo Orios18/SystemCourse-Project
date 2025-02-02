@@ -666,13 +666,34 @@ public class GenericUIApp extends JPanel {
         gbc.anchor = GridBagConstraints.LINE_START;
         inputPanel.add(label, gbc);
 
-        SpinnerDateModel dateModel = new SpinnerDateModel();
+        // Define the start date, end date, and initial date
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2022, Calendar.JANUARY, 1); // Start date: January 1, 2022
+        Date startDate = calendar.getTime();
+
+        calendar.set(2024, Calendar.OCTOBER, 12); // End date: October 12, 2024
+        Date endDate = calendar.getTime();
+
+        Date initialDate = startDate; // Initial date set to the start date
+
+        // Create the SpinnerDateModel with the start, end, and initial dates
+        SpinnerDateModel dateModel = new SpinnerDateModel(initialDate, null, null, Calendar.DAY_OF_MONTH);
         JSpinner dateSpinner = new JSpinner(dateModel);
         dateSpinner.setName(spinnerName);
 
         // Configure how the spinner displays dates: "yyyy-MM-dd"
         JSpinner.DateEditor editor = new JSpinner.DateEditor(dateSpinner, "yyyy-MM-dd");
         dateSpinner.setEditor(editor);
+
+        // Add a change listener to enforce the date range
+        dateSpinner.addChangeListener(e -> {
+            Date currentDate = (Date) dateSpinner.getValue();
+            if (currentDate.before(startDate)) {
+                dateSpinner.setValue(startDate); // Clamp to the start date
+            } else if (currentDate.after(endDate)) {
+                dateSpinner.setValue(endDate); // Clamp to the end date
+            }
+        });
 
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.CENTER;
