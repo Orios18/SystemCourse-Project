@@ -70,7 +70,11 @@ Before running the application, ensure you have the following installed:
   IGNORE 1 ROWS;
   
   Replace `path/to/your/wine.csv` with the actual path to your CSV file.
-
+  ```
+-Use the `ALTER TABLE` command to add an id column to your table.
+ ```
+ ALTER TABLE your_table ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY;
+ ``` 
 
 4. **Configure the database connection**:
 
